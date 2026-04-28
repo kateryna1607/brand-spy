@@ -1,0 +1,1 @@
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMgm3KXXO527X1y1Y7S1bSzyhsOQi9IuIHXosJcy92qV brandspy@maisonagostini.com

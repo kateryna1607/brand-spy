@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: brand-spy
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn web_ui:app --bind 0.0.0.0:8080

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRAND SPY — Strategic Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #bda37a;
+            --secondary: #1a1816;
+            --accent: #a45a3a;
+            --bg: #ffffff;
+            --text: #33302d;
+            --border: rgba(189, 163, 122, 0.4);
+            --glass: rgba(255, 255, 255, 0.65);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0 !important;
+            padding: 0 !important;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        /* Villa Interior Background Layer */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/villa_interior.png?v=5') no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+            image-rendering: -webkit-optimize-contrast;
+            filter: brightness(0.95); /* Subtle dimming to make the glass card pop */
+        }
+
+        .concierge-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            padding: 60px;
+            border-radius: 2px; /* Sharper edges for a more modern, expensive look */
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 30px 100px rgba(0,0,0,0.08);
+            max-width: 650px;
+            width: 90%;
+            text-align: center;
+            animation: fadeIn 1.2s ease-out;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        p {
+            font-size: 0.95rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-weight: 600;
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 100%;
+            padding: 20px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--border);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.2rem;
+            color: var(--secondary);
+            outline: none;
+            transition: border-color 0.4s;
+            text-align: center;
+        }
+
+        input:focus {
+            border-bottom-color: var(--primary);
+        }
+
+        input::placeholder {
+            color: #ccc;
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loader {
+            display: none;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .loader span {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Discreet Silk-Thread Progress Bar */
+        .progress-container {
+            width: 100%;
+            background: rgba(189, 163, 122, 0.15);
+            height: 3px;
+            overflow: hidden;
+            margin: 25px 0;
+            border-radius: 2px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            box-shadow: 0 0 15px rgba(189, 163, 122, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
+            transition: width 0.4s ease-out;
+        }
+
+        .status-msg {
+            margin-top: 15px;
+            font-style: italic;
+            color: var(--secondary);
+        }
+
+        .error-msg {
+            display: none;
+            margin-top: 20px;
+            padding: 15px 20px;
+            background: rgba(164, 90, 58, 0.08);
+            border: 1px solid rgba(164, 90, 58, 0.3);
+            color: var(--accent);
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .concierge-card {
+                padding: 40px 20px;
+                width: 95%;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            p {
+                font-size: 0.8rem;
+                margin-bottom: 25px;
+            }
+            input {
+                font-size: 1rem;
+                padding: 15px 0;
+            }
+            button {
+                padding: 15px 20px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-layer"></div>
+    
+    <div class="concierge-card">
+        <!-- Language Selector -->
+        <div class="lang-selector">
+            <span class="globe">🌐</span>
+            <button onclick="setLanguage('en')">EN</button>
+            <button onclick="setLanguage('fr')">FR</button>
+            <button onclick="setLanguage('ru')">RU</button>
+        </div>
+
+        <div class="brand-logo" style="font-family: 'Playfair Display', serif; font-size: 0.8rem; letter-spacing: 0.5em; text-transform: uppercase; color: var(--primary); margin-bottom: 20px;">Global Strategic Recon</div>
+        <h1 id="title">BRAND SPY</h1>
+        <p id="tagline">Strategic Intelligence Agent</p>
+        
+        <form id="auditForm">
+            <div class="input-group">
+                <label for="target_url">TARGET COMPETITOR URL</label>
+                <input type="text" id="target_url" name="target_url" placeholder="www.archvisual.ch" required>
+            </div>
+
+            <div class="input-group" style="margin-top: 20px;">
+                <label for="access_code" style="color: var(--accent); letter-spacing: 2px;">EXECUTIVE ACCESS CODE</label>
+                <input type="password" id="access_code" name="access_code" placeholder="••••••••" required 
+                       style="border-color: var(--accent); background: rgba(189, 163, 122, 0.05);">
+            </div>
+
+            <button type="submit" class="analyze-btn" id="submitBtn">
+                <span class="btn-text">INITIATE DEEP SCAN</span>
+            </button>
+        </form>
+
+        <div class="loader" id="loader">
+            <span id="statusText">Analyzing target architecture...</span>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="status-msg" id="loaderMsg">Our AI is extracting high-value market data.</div>
+        </div>
+        <div class="error-msg" id="errorMsg"></div>
+    </div>
+
+    <style>
+        .lang-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .lang-selector .globe { font-size: 1.2rem; cursor: pointer; }
+        .lang-selector button {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            width: auto;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .lang-selector button:hover { background: var(--primary); color: white; }
+        .lang-selector button.active { background: var(--primary); color: white; }
+
+        @media (max-width: 768px) {
+            .lang-selector {
+                top: 10px;
+                right: 10px;
+                gap: 5px;
+            }
+            .lang-selector button {
+                padding: 4px 6px;
+                font-size: 0.6rem;
+            }
+            .lang-selector .globe { font-size: 1rem; }
+            .brand-logo { font-size: 0.65rem !important; }
+        }
+    </style>
+
+    <script>
+        let currentLang = 'en';
+        const translations = {
+            en: {
+                title: "BRAND SPY",
+                tagline: "Strategic Intelligence Agent",
+                placeholder: "e.g. www.archvisual.ch",
+                button: "Launch Strategic Audit",
+                status: "Analyzing target architecture...",
+                loaderMsg: "Our AI is extracting high-value market data.",
+                messages: [
+                    "Scanning competitor positioning...",
+                    "Extracting pricing intelligence...",
+                    "Mapping brand architecture...",
+                    "Analyzing market signals...",
+                    "Generating strategic insights...",
+                    "Compiling executive report..."
+                ]
+            },
+            fr: {
+                title: "BRAND SPY",
+                tagline: "Agent d'Intelligence Stratégique",
+                placeholder: "ex. www.archvisual.ch",
+                button: "Lancer l'Audit Stratégique",
+                status: "Analyse de l'architecture cible...",
+                loaderMsg: "Notre IA extrait des données à haute valeur ajoutée.",
+                messages: [
+                    "Analyse du positionnement concurrent...",
+                    "Extraction des données de prix...",
+                    "Cartographie de l'architecture de marque...",
+                    "Analyse des signaux de marché...",
+                    "Génération des insights stratégiques...",
+                    "Compilation du rapport exécutif..."
+                ]
+            },
+            ru: {
+                title: "BRAND SPY",
+                tagline: "Агент Стратегической Разведки",
+                placeholder: "напр. www.archvisual.ch",
+                button: "Запустить Стратегический Аудит",
+                status: "Анализ целевой архитектуры...",
+                loaderMsg: "Наш ИИ извлекает ценные рыночные данные.",
+                messages: [
+                    "Сканирование позиционирования конкурента...",
+                    "Извлечение ценовых данных...",
+                    "Картографирование архитектуры бренда...",
+                    "Анализ рыночных сигналов...",
+                    "Генерация стратегических инсайтов...",
+                    "Компиляция исполнительного отчёта..."
+                ]
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-selector button').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector(`.lang-selector button[onclick="setLanguage('${lang}')"]`);
+            if (btn) btn.classList.add('active');
+            document.getElementById('title').innerText = translations[lang].title;
+            document.getElementById('tagline').innerText = translations[lang].tagline;
+            document.getElementById('target_url').placeholder = translations[lang].placeholder;
+            const btnSpan = document.querySelector('#submitBtn .btn-text');
+            if (btnSpan) btnSpan.innerText = translations[lang].button;
+            else document.getElementById('submitBtn').innerText = translations[lang].button;
+            document.getElementById('statusText').innerText = translations[lang].status;
+            document.getElementById('loaderMsg').innerText = translations[lang].loaderMsg;
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.innerText = msg;
+            el.style.display = 'block';
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('auditForm').style.display = 'block';
+        }
+
+        const form = document.getElementById('auditForm');
+        const loader = document.getElementById('loader');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusText = document.getElementById('statusText');
+        const progressBar = document.getElementById('progressBar');
+
+        // Set EN active on load
+        setLanguage('en');
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('target_url').value;
+            const code = document.getElementById('access_code').value;
+
+            document.getElementById('errorMsg').style.display = 'none';
+            form.style.display = 'none';
+            loader.style.display = 'block';
+
+            // Rotating status messages
+            const msgs = translations[currentLang].messages;
+            let msgIdx = 0;
+            const msgInterval = setInterval(() => {
+                msgIdx = (msgIdx + 1) % msgs.length;
+                document.getElementById('statusText').innerText = msgs[msgIdx];
+            }, 4000);
+
+            // Simulated progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                if (progress < 90) {
+                    progress += (90 - progress) * 0.1;
+                    progressBar.style.width = progress + '%';
+                }
+            }, 500);
+
+            // 2-minute timeout
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 120000);
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url, lang: currentLang, access_code: code}),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeout);
+                clearInterval(interval);
+                clearInterval(msgInterval);
+                progressBar.style.width = '100%';
+
+                const data = await response.json();
+
+                if (data.success) {
+                    setTimeout(() => {
+                        window.location.href = data.report_url;
+                    }, 500);
+                } else {
+                    showError(data.error || 'Analysis failed. Please try again.');
+                }
+            } catch (err) {
+                clearTimeout(timeout);
+                clearInterval(interval);
+                clearInterval(msgInterval);
+                if (err.name === 'AbortError') {
+                    showError('Request timed out. The target site may be unreachable.');
+                } else {
+                    showError('Connection error. Please check your internet.');
+                }
+            }
+        };
+    </script>
+</body>
+</html>
